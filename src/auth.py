@@ -47,59 +47,62 @@ class Auth():
             'Referer': Auth.LEARNING_REGISTER
         })
 
-        register_get_response = BeautifulSoup(
-            session.get(Auth.LEARNING_REGISTER).text,
-            'html.parser'
-        )
+        try:
+            register_get_response = BeautifulSoup(
+                session.get(Auth.LEARNING_REGISTER).text,
+                'html.parser'
+            )
 
-        email_check_response = session.get(
-            Auth.LEARNING_EMAIL_CHECK, params={'email': fields['email']}
-        ).json()
+            email_check_response = session.get(
+                Auth.LEARNING_EMAIL_CHECK, params={'email': fields['email']}
+            ).json()
 
-        if not email_check_response['success']:
-            raise EmailError(email_check_response['message'])
+            if not email_check_response['success']:
+                raise EmailError(email_check_response['message'])
 
-        password_name = register_get_response.find(
-            'input', {'type': 'password'}
-        )['name']
+            password_name = register_get_response.find(
+                'input', {'type': 'password'}
+            )['name']
 
-        csrf_token = register_get_response.find(
-            'input', {'name': 'csrfmiddlewaretoken'}
-        )['value']
+            csrf_token = register_get_response.find(
+                'input', {'name': 'csrfmiddlewaretoken'}
+            )['value']
 
-        password_check_response = session.post(
-            Auth.LEARNING_PASSWORD_CHECK,
-            data={
-                'csrfmiddlewaretoken': csrf_token,
-                password_name: fields['password'],
-                'field_name': password_name
-            }
-        ).json()
+            password_check_response = session.post(
+                Auth.LEARNING_PASSWORD_CHECK,
+                data={
+                    'csrfmiddlewaretoken': csrf_token,
+                    password_name: fields['password'],
+                    'field_name': password_name
+                }
+            ).json()
 
-        if not password_check_response['valid']:
-            raise PasswordError(password_check_response['msg'])
+            if not password_check_response['valid']:
+                raise PasswordError(password_check_response['msg'])
 
-        register_post_response = session.post(
-            Auth.LEARNING_REGISTER,
-            data={
-                'next': '',
-                'trial_length': register_get_response.find(
-                    id='id_trial_length'
-                )['value'],
-                'csrfmiddlewaretoken': csrf_token,
-                'first_name': fields['first_name'],
-                'last_name': fields['last_name'],
-                'email': fields['email'],
-                'password1': fields['password'],
-                'country': fields['country'],
-                'referrer': fields['referrer'],
-                'recently_viewed_bits': '[]'
-            }
-        )
+            register_post_response = session.post(
+                Auth.LEARNING_REGISTER,
+                data={
+                    'next': '',
+                    'trial_length': register_get_response.find(
+                        id='id_trial_length'
+                    )['value'],
+                    'csrfmiddlewaretoken': csrf_token,
+                    'first_name': fields['first_name'],
+                    'last_name': fields['last_name'],
+                    'email': fields['email'],
+                    'password1': fields['password'],
+                    'country': fields['country'],
+                    'referrer': fields['referrer'],
+                    'recently_viewed_bits': '[]'
+                }
+            )
 
-        self.__handle_broken_cookies(register_post_response, session)
-    
-        return session
+            self.__handle_broken_cookies(register_post_response, session)
+        
+            return session
+        except RequestException:
+            return None
 
     def __handle_broken_cookies(self, response, session):
         for cookie in response.raw.headers.getlist('Set-Cookie'):
