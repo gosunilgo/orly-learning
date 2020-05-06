@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from http.cookies import SimpleCookie
 import re
 from urllib.parse import urljoin
@@ -9,7 +10,9 @@ from requests.exceptions import RequestException
 from src.constants.headers import Headers
 from src.constants.urls import Url
 
-from .exceptions import EmailError, PasswordError
+from .exceptions import (
+    EmailError, PasswordError, InvalidSession, SubscriptionExpiredError
+)
 
 class Auth():
 
@@ -19,10 +22,14 @@ class Auth():
     LEARNING_REGISTER = urljoin(Url.LEARNING, 'register/')
     LEARNING_EMAIL_CHECK = urljoin(Url.LEARNING, 'check-email-availability/')
     LEARNING_PASSWORD_CHECK = urljoin(Url.LEARNING, 'check-password/')
+    LEARNING_PROFILE = urljoin(Url.LEARNING, 'profile/')
 
     def __init__(self, session, proxy):
         self.session = session
         self.proxy = proxy
+
+        if self.session:
+            self.check_subscription()
     
     def login(self, email, password):
         self.__initialize_session()
@@ -38,6 +45,8 @@ class Auth():
             )
             
             self.__handle_broken_cookies(login_post_response)
+
+            self.check_subscription()
 
             return self.session
         except RequestException:
@@ -110,9 +119,18 @@ class Auth():
 
             self.__handle_broken_cookies(register_post_response)
         
+            self.check_subscription()
+
             return self.session
         except RequestException:
             return None
+
+    def check_subscription(self):
+        response = self.session.get(Auth.LEARNING_PROFILE)
+        if response.status_code != HTTPStatus.OK.value:
+            raise InvalidSession()
+        if 'user_type": "Expired' in response.text:
+            raise SubscriptionExpiredError()
 
     def __handle_broken_cookies(self, response):
         for cookie in response.raw.headers.getlist('Set-Cookie'):
