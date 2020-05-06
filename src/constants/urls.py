@@ -8,4 +8,3 @@ class Url():
     API = '{}api.{}'.format(__SCHEME, __OREILLY_BASE_HOST)
     OREILLY = '{}www.{}'.format(__SCHEME, __OREILLY_BASE_HOST)
     LEARNING = '{}learning.{}'.format(__SCHEME, __OREILLY_BASE_HOST)
-    LEARNING_PROFILE = urljoin(LEARNING, 'profile/')
