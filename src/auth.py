@@ -126,7 +126,9 @@ class Auth():
             return None
 
     def check_subscription(self):
-        response = self.session.get(Auth.LEARNING_PROFILE)
+        response = self.session.get(
+            Auth.LEARNING_PROFILE, allow_redirects=False
+        )
         if response.status_code != HTTPStatus.OK.value:
             raise InvalidSession()
         if 'user_type": "Expired' in response.text:
