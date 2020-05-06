@@ -1,6 +1,7 @@
 from urllib.parse import urljoin
 
 from .constants.urls import Url
+from .exceptions import InvalidSession
 
 class Book():
     
@@ -11,9 +12,15 @@ class Book():
         self.session = session
     
     def get_info(self, book_id):
+        if not self.session:
+            raise InvalidSession()
+
         return self.session.get(Book.LEARNING_BOOK.format(book_id)).json()
     
     def get_chapters_info(self, book_id):
+        if not self.session:
+            raise InvalidSession()
+
         return [
             chapter
             for page_chapters in self.__get_chapters(
