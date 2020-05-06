@@ -14,19 +14,22 @@ from .exceptions import EmailError, PasswordError
 class Auth():
 
     OREILLY_LOGIN = urljoin(Url.OREILLY, 'member/auth/login/')
+    LEARNING_LOGOUT = urljoin(Url.LEARNING, 'accounts/logout/')
+    API_END_SESSION = urljoin(Url.API, 'v1/auth/openid/end-session/')
     LEARNING_REGISTER = urljoin(Url.LEARNING, 'register/')
     LEARNING_EMAIL_CHECK = urljoin(Url.LEARNING, 'check-email-availability/')
     LEARNING_PASSWORD_CHECK = urljoin(Url.LEARNING, 'check-password/')
 
-    def __init__(self, proxy):
+    def __init__(self, session, proxy):
+        self.session = session
         self.proxy = proxy
     
     def login(self, email, password):
-        session = self.__initialize_session()
-        session.headers.update({'Referer': Url.LEARNING})
+        self.__initialize_session()
+        self.session.headers.update({'Referer': Url.LEARNING})
 
         try:
-            login_post_response = session.post(
+            login_post_response = self.session.post(
                 Auth.OREILLY_LOGIN,
                 json={
                     'email': email,
@@ -34,26 +37,33 @@ class Auth():
                 }
             )
             
-            self.__handle_broken_cookies(login_post_response, session)
+            self.__handle_broken_cookies(login_post_response)
 
-            return session
+            return self.session
         except RequestException:
             return None
     
+    def logout(self):
+        self.session.get(Auth.LEARNING_LOGOUT)
+        self.session.get(Auth.API_END_SESSION)
+        self.session = None
+
+        return self.session
+
     def register(self, fields):
-        session = self.__initialize_session()
-        session.headers.update({
+        self.__initialize_session()
+        self.session.headers.update({
             'X-Requested-With': 'XMLHttpRequest',
             'Referer': Auth.LEARNING_REGISTER
         })
 
         try:
             register_get_response = BeautifulSoup(
-                session.get(Auth.LEARNING_REGISTER).text,
+                self.session.get(Auth.LEARNING_REGISTER).text,
                 'html.parser'
             )
 
-            email_check_response = session.get(
+            email_check_response = self.session.get(
                 Auth.LEARNING_EMAIL_CHECK, params={'email': fields['email']}
             ).json()
 
@@ -68,7 +78,7 @@ class Auth():
                 'input', {'name': 'csrfmiddlewaretoken'}
             )['value']
 
-            password_check_response = session.post(
+            password_check_response = self.session.post(
                 Auth.LEARNING_PASSWORD_CHECK,
                 data={
                     'csrfmiddlewaretoken': csrf_token,
@@ -80,7 +90,7 @@ class Auth():
             if not password_check_response['valid']:
                 raise PasswordError(password_check_response['msg'])
 
-            register_post_response = session.post(
+            register_post_response = self.session.post(
                 Auth.LEARNING_REGISTER,
                 data={
                     'next': '',
@@ -98,13 +108,13 @@ class Auth():
                 }
             )
 
-            self.__handle_broken_cookies(register_post_response, session)
+            self.__handle_broken_cookies(register_post_response)
         
-            return session
+            return self.session
         except RequestException:
             return None
 
-    def __handle_broken_cookies(self, response, session):
+    def __handle_broken_cookies(self, response):
         for cookie in response.raw.headers.getlist('Set-Cookie'):
             simple_cookie = SimpleCookie()
             simple_cookie.load(cookie)
@@ -112,15 +122,13 @@ class Auth():
                 try:
                     int(morsel['max-age'])
                 except ValueError:
-                    session.cookies.set(key, morsel.value)
+                    self.session.cookies.set(key, morsel.value)
 
     def __initialize_session(self):
-        session = Session()
+        self.session = Session()
 
         if self.proxy:
-            session.proxies = self.proxy
-            session.verify = False
+            self.session.proxies = self.proxy
+            self.session.verify = False
         
-        session.headers.update(Headers.HEADERS)
-
-        return session
+        self.session.headers.update(Headers.HEADERS)
