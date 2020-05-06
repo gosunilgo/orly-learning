@@ -5,26 +5,43 @@ from urllib.parse import parse_qs, urljoin, urlparse, quote_plus
 from requests import Session
 from requests.exceptions import RequestException
 
-from .constants.urls import Url
-
 from .auth import Auth
+from .book import Book
+from .constants.urls import Url
 
 class OReillyLearningClient():
 
     def __init__(self, session=None, proxy=None):
-        self.session = session
         self.proxy = proxy
 
+        self.auth = Auth(session, proxy)
+        self.book = Book(session)
+
     def login(self, email, password):
-        self.session = Auth(self.proxy).login(email, password)
-        return bool(self.session)
+        self.set_session(self.auth.login(email, password))
+
+    def logout(self):
+        self.set_session(self.auth.logout(), set_proxy=False)
 
     def register(self, fields_dict):
-        self.session = Auth(self.proxy).register(fields_dict)
-        return bool(self.session)
-    
+        self.set_session(self.auth.register(fields_dict), set_proxy=False)
+
     def get_book_info(self, book_id):
-        return self.session.get(
-            '{}{}/'.format(Url.LEARNING_BOOK, book_id)
-        ).json()
-        
+        return self.book.get_info(book_id)
+
+    def get_book_chapters_info(self, book_id):
+        return self.book.get_chapters_info(book_id)
+
+    def set_session(self, session, set_proxy=True):
+        if session and set_proxy:
+            session.proxies = self.proxy
+
+        self.auth.session = session
+        self.book.session = session
+
+    def set_proxy(self, proxy):
+        self.proxy = proxy
+
+        self.auth.proxy = self.proxy
+        self.auth.session.proxies = self.proxy
+        self.book.session.proxies = self.proxy
