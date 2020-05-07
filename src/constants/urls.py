@@ -1,5 +1,3 @@
-from urllib.parse import urljoin
-
 class Url():
 
     __SCHEME = 'https://'
