@@ -12,9 +12,6 @@ class BookHandler(AbstractHandler):
     LEARNING_BOOK = urljoin(Url.LEARNING, '/api/v1/book/{}/')
     LEARNING_BOOK_CHAPTER = urljoin(LEARNING_BOOK, 'chapter/')
 
-    def get_book(self, book_id: int):
-        pass
-
     def get_info(self, book_id: int):
         self._check_session()
 
