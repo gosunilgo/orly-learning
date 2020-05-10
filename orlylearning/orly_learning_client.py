@@ -1,6 +1,6 @@
 from .handler import AuthHandler, BookHandler, UserHandler
 
-class OReillyLearningClient():
+class ORlyLearningClient():
 
     def __init__(self, session=None, proxy=None):
         self.proxy = proxy
