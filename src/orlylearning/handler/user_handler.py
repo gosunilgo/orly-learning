@@ -16,7 +16,7 @@ class UserHandler(AbstractHandler):
 
     INITIAL_STORE_DATA_SEARCH = 'window.initialStoreData = '
     INITIAL_STORE_DATA__VALUE_REGEX = re.compile(
-        r"window\.initialStoreData = (.+?);", re.S
+        r'window\.initialStoreData = (.+?);', re.S
     )
 
     def get_info(self) -> dict:
