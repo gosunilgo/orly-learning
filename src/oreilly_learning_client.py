@@ -1,4 +1,4 @@
-from .handler import AuthHandler, BookHandler
+from .handler import AuthHandler, BookHandler, UserHandler
 
 class OReillyLearningClient():
 
@@ -7,6 +7,7 @@ class OReillyLearningClient():
 
         self.auth_handler = AuthHandler(session, proxy)
         self.book_handler = BookHandler(session)
+        self.user_handler = UserHandler(session)
 
     def login(self, email, password):
         self.set_session(self.auth_handler.login(email, password))
@@ -18,6 +19,9 @@ class OReillyLearningClient():
         self.set_session(
             self.auth_handler.register(fields_dict), set_proxy=False
         )
+
+    def get_user_info(self):
+        return self.user_handler.get_info()
 
     def get_book_info(self, book_id):
         return self.book_handler.get_info(book_id)
@@ -31,6 +35,7 @@ class OReillyLearningClient():
 
         self.auth_handler.session = session
         self.book_handler.session = session
+        self.user_handler.session = session
 
     def set_proxy(self, proxy):
         self.proxy = proxy
@@ -38,3 +43,4 @@ class OReillyLearningClient():
         self.auth_handler.proxy = self.proxy
         self.auth_handler.session.proxies = self.proxy
         self.book_handler.session.proxies = self.proxy
+        self.user_handler.session.proxies = self.proxy
