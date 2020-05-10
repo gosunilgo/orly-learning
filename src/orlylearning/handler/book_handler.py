@@ -1,4 +1,5 @@
 from http import HTTPStatus
+from typing import Iterator
 from urllib.parse import urljoin
 
 from ..constants.urls import Url
@@ -11,10 +12,10 @@ class BookHandler(AbstractHandler):
     LEARNING_BOOK = urljoin(Url.LEARNING, '/api/v1/book/{}/')
     LEARNING_BOOK_CHAPTER = urljoin(LEARNING_BOOK, 'chapter/')
 
-    def get_book(self, book_id):
+    def get_book(self, book_id: int):
         pass
 
-    def get_info(self, book_id):
+    def get_info(self, book_id: int):
         self._check_session()
 
         response = self.session.get(BookHandler.LEARNING_BOOK.format(book_id))
@@ -23,7 +24,7 @@ class BookHandler(AbstractHandler):
 
         return response.json()
 
-    def get_chapters_info(self, book_id):
+    def get_chapters_info(self, book_id: int):
         self._check_session()
 
         return [
@@ -34,7 +35,7 @@ class BookHandler(AbstractHandler):
             for chapter in page_chapters
         ]
 
-    def __get_chapters(self, page_url):
+    def __get_chapters(self, page_url: str) -> Iterator[list]:
         response = self.session.get(page_url)
         if response.status_code == HTTPStatus.UNAUTHORIZED.value:
             raise InvalidSession()

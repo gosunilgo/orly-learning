@@ -19,7 +19,7 @@ class UserHandler(AbstractHandler):
         r"window\.initialStoreData = (.+?);", re.S
     )
 
-    def get_info(self):
+    def get_info(self) -> dict:
         self._check_session()
 
         response = self.session.get(
