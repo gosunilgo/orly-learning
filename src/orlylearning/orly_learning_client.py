@@ -4,7 +4,7 @@ from .handler import AuthHandler, BookHandler, UserHandler
 
 class ORlyLearningClient():
 
-    def __init__(self, session: Session=None, proxy: dict=None):
+    def __init__(self, session: Session = None, proxy: dict = None):
         self.proxy = proxy
 
         self.auth_handler = AuthHandler(session, proxy)
@@ -31,7 +31,7 @@ class ORlyLearningClient():
     def get_book_chapters_info(self, book_id: int) -> dict:
         return self.book_handler.get_chapters_info(book_id)
 
-    def set_session(self, session: Session, set_proxy: bool=True):
+    def set_session(self, session: Session, set_proxy: bool = True):
         if session and set_proxy:
             session.proxies = self.proxy
 
