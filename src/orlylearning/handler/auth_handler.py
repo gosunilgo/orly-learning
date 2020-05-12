@@ -4,7 +4,6 @@ from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
 from requests import Response, Session
-from requests.exceptions import RequestException
 
 from ..constants.headers import Headers
 from ..constants.urls import Url
