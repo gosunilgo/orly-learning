@@ -1,16 +1,16 @@
-from os import path
 from setuptools import setup, find_packages
 
-project_path = path.abspath(path.dirname(__file__))
-
-with open(
-        path.join(project_path, 'requirements.txt'), encoding='utf-8'
-) as req_file:
-    install_requires = req_file.read()
+install_requires = [
+    'beautifulsoup4',
+    'lxml',
+    'requests >= 2.0'
+]
 
 tests_require = [
     'coverage',
-    'response'
+    'responses',
+    'pytest',
+    'pytest-cov'
 ]
 
 extras_require = {'tests': tests_require}
@@ -27,7 +27,8 @@ setup(
         'Development Status :: 2 - Pre-Alpha',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3.8',
-        'Intended Audience :: Developers'
+        'Intended Audience :: Developers',
+        "Operating System :: OS Independent"
     ],
     package_dir={'': 'src'},
     packages=find_packages(where='src'),
