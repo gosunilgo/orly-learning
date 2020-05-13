@@ -7,7 +7,9 @@ from requests import Response, Session
 
 from ..constants.headers import Headers
 from ..constants.urls import Url
-from ..exceptions import EmailError, PasswordError, InvalidCredentials
+from ..exceptions import (
+    EmailError, PasswordError, InvalidCredentials, InvalidSession
+)
 
 from .abstract_handler import AbstractHandler
 
@@ -44,8 +46,12 @@ class AuthHandler(AbstractHandler):
         return self.session
 
     def logout(self):
+        self._check_session()
+
         self.session.get(AuthHandler.LEARNING_LOGOUT)
-        self.session.get(AuthHandler.API_END_SESSION)
+        response = self.session.get(AuthHandler.API_END_SESSION)
+        if response.status_code == HTTPStatus.FORBIDDEN.value:
+            raise InvalidSession()
         self.session = None
 
         return self.session
