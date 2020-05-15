@@ -9,8 +9,8 @@ python:
   - "3.8"
 
 install:
-  pip install tox-travis
-  pip install coverage
+  - pip install tox-travis
+  - pip install coverage
 
 script:
   tox
