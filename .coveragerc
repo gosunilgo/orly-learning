@@ -1,8 +1,9 @@
 [run]
-source = orlylearning
 branch = True
+parallel = True
+source = orlylearning
 
-[path]
+[paths]
 source =
-   src
-   .tox/*/site-packages
+  src
+  .tox/*/site-packages/
