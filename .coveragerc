@@ -1,0 +1,8 @@
+[run]
+source = orlylearning
+branch = True
+
+[path]
+source =
+   src
+   .tox/*/site-packages
