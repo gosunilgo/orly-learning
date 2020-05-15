@@ -8,6 +8,12 @@ python:
   - "3.7"
   - "3.8"
 
-install: pip install tox-travis
+install:
+  pip install tox-travis
+  pip install coverage
 
-script: tox
+script:
+  tox
+after_success:
+  coverage combine
+  - coveralls
