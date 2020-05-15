@@ -15,5 +15,5 @@ install:
 script:
   tox
 after_success:
-  coverage combine
+  - coverage combine
   - coveralls
