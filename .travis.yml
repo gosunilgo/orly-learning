@@ -10,10 +10,6 @@ python:
 
 install:
   - pip install tox-travis
-  - pip install coverage
 
 script:
-  tox
-after_success:
-  - coverage combine
-  - coveralls
+  - tox
